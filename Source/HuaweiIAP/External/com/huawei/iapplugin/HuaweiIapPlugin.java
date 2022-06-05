@@ -45,7 +45,7 @@ public class HuaweiIapPlugin {
     public static void initialize(NativeActivity activity, HuaweiIapListener listener) {
         if (!isInit) {
             mActivity = activity;
-            client = IapClient.getIapClient(mActivity);
+            client = Iap.getIapClient(mActivity);
             mListener = listener;
         }
     }
