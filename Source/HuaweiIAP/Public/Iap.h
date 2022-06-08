@@ -8,6 +8,11 @@
 #define IN_APP_CONSUMABLE 0
 #define IN_APP_NONCONSUMABLE 1
 #define IN_APP_SUBSCRIPTION 2
+#define CHECK_ENVIRONMENT 0
+#define QUERY_PRODUCTS 1
+#define BUY_PRODUCT 2
+#define QUERY_PURCHASES 3
+#define GET_PURCHASES_RECORDS 4
 
 namespace huawei
 {
@@ -93,21 +98,22 @@ namespace huawei
 
     class IapListener
     {
-        virtual void onCheckEnvironmentSuccess();
-        virtual void onException(const FString &action, const FString &message);
-        virtual void onObtainProductList(const std::vector<ProductInfo> &products, int type);
-        virtual void onPurchaseSuccess(const FString &productId, int type);
-        virtual void onObtainPurchases(const std::vector<InAppPurchaseData> &purchasedProductIds, const std::vector<InAppPurchaseData> &nonPurchasedProductIds, int type);
-        virtual void onObtainPurchasedRecords(const std::vector<InAppPurchaseData> &purchasedProductIds, int type);
+    public:    
+        virtual void onCheckEnvironmentSuccess() = 0;
+        virtual void onException(int action, const FString message) = 0;
+        virtual void onObtainProductList(const TArray<ProductInfo> products, int type) = 0;
+        virtual void onPurchaseSuccess(const FString productId, int type) = 0;
+        virtual void onObtainPurchases(const TArray<InAppPurchaseData> purchasedProductIds, const TArray<InAppPurchaseData> nonPurchasedProductIds, int type) = 0;
+        virtual void onObtainPurchasedRecords(const TArray<InAppPurchaseData> purchasedProductIds, int type) = 0;
     };
 
     class Iap
     {
     public:
         static void checkEnvironment();
-        static void queryProducts(const std::vector<FString> &productIds, int type);
+        static void queryProducts(const TArray<FString> productIds, int type);
         static void queryPurchases(int type);
-        static void buyProduct(FString &productId, int type);
+        static void buyProduct(FString productId, int type);
         static void getPurchasedRecords(int type);
 
         static void setListener(IapListener *listener);

@@ -1,5 +1,3 @@
-// Copyright 2020-2021 Nikolay Prudnikov. All Rights Reserved.
-
 #pragma once
 
 #include "HuaweiIapSettings.generated.h"

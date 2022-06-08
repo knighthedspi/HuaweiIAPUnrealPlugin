@@ -158,7 +158,7 @@ According to [HMS integration process introduction](https://developer.huawei.com
 
 Access the Huawei IAP API by including the header file `Iap.h` in the related classes of your project.
 
-```
+```C++
 #include "Iap.h"
 ```
 
@@ -173,53 +173,71 @@ Huawei IAP supported 3 types:
 
 - Checking the support for Huawei IAP 
 
-```
+```C++
 huawei::Iap::checkEnviroment();
 ```
 - Query products configured in AppGallery Connect
 To query the products, you need to specify the product IDs and type.
-Sample code
 
-```
-vector<FString> productIds = { "productId１", "productId2", "productId3" }
+Sample code
+```C++
+TArray<FString> productIds;
+productIds.Init("productId１", "productId2", "productId3");
 huawei::Iap:queryProducts(productIds, IN_APP_CONSUMABLE);
 ```
 
 - Query purchase data of the products that bought by user.
 
-```
+Sample code
+```C++
 huawei::Iap::queryPurchases(IN_APP_CONSUMABLE);
 ```
 - Buy a product
 
-```
+Sample code
+```C++
 huawei::Iap::buyProduct("productId1", IN_APP_CONSUMABLE);
 ```
 
 - Query the purchased records
 
-```
+Sample code
+```C++
 huawei::Iap::getPurchasedRecords(IN_APP_CONSUMABLE)
 ```
 
 - Listen to callback events
 Implement a listener class to receive information in all the IAP callback events
 
-```
+Action types table:
+<div style="width:80px">Type</div>                       | Description                | 
+  | ------------------------------------------------------------ | ----------------------- |
+  | CHECK_ENVIRONMENT | Check the support for Huawei IAP |
+  | QUERY_PRODUCTS | Query products configured on Huawei AppGalleryConnect |
+  | BUY_PRODUCT | Buy the product |
+  | QUERY_PURCHASES | Query the purchased data |
+  | GET_PURCHASES_RECORDS | Get the purchased records |
+
+Sample code
+Header file
+```C++
 class YourIapListener : public huawei::IapListener {
 public:
-    onCheckEnvironmentSuccess();
-    onException(const FString &action, const FString &message);
-    onObtainProductList(const std::vector<ProductInfo> &products, int type);
-    onPurchaseSuccess(const FString &productId, int type);
-    onObtainPurchases(const std::vector<InAppPurchaseData> &purchasedProductIds, const std::vector<InAppPurchaseData> &nonPurchasedProductIds, int type);
-    onObtainPurchasedRecords(const std::vector<InAppPurchaseData> &purchasedProductIds, int type); 
+    YourIapListener();
+    
+    void onCheckEnvironmentSuccess();
+    void onException(int action, const FString message);
+    void onObtainProductList(const TArray<ProductInfo> products, int type);
+    void onPurchaseSuccess(const FString productId, int type);
+    void onObtainPurchases(const TArray<InAppPurchaseData> purchasedProductDatas, const TArray<InAppPurchaseData> nonPurchasedProductDatas, int type);
+    void onObtainPurchasedRecords(const TArray<InAppPurchaseData> purchasedProductDatas, int type);
 }  
 ```
 
 Then set it with the `setListener` API
 
-```
+Sample code
+```C++
 huawei::Iap::setListener(new YourIapListener());
 ```
 

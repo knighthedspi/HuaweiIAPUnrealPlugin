@@ -63,7 +63,7 @@ public class IapRequestHelper {
         PurchaseIntentReq req = new PurchaseIntentReq();
         req.setPriceType(type);
         req.setProductId(productId);
-        req.setDeveloperPayload("testPurchase");
+        req.setDeveloperPayload("SdkPurchase");
         return req;
     }
 
@@ -77,7 +77,7 @@ public class IapRequestHelper {
     private static ConsumeOwnedPurchaseReq createConsumeOwnedPurchaseReq(String purchaseToken) {
         ConsumeOwnedPurchaseReq req = new ConsumeOwnedPurchaseReq();
         req.setPurchaseToken(purchaseToken);
-        req.setDeveloperChallenge("testConsume");
+        req.setDeveloperChallenge("SdkConsume");
         return req;
     }
 

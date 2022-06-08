@@ -42,7 +42,7 @@ public class ExceptionHandle {
      * @param e The exception returned from the IAP API.
      * @return int
      */
-    public static int handle(Activity activity, String action, Exception e, HuaweiIapListener listener) {
+    public static int handle(Activity activity, int action, Exception e, HuaweiIapListener listener) {
 
         if (e instanceof IapApiException) {
             IapApiException iapApiException = (IapApiException) e;

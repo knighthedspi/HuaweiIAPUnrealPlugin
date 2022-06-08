@@ -172,7 +172,7 @@
 
                 //Native C++ functions
                 public native void nativeOnCheckEnvironmentSuccess();
-                public native void nativeOnException(String action, String message);
+                public native void nativeOnException(int action, String message);
                 public native void nativeOnObtainProductList(String productsData, int type);
                 public native void nativeOnPurchaseSuccess(String productId, int type);
                 public native void nativeOnObtainPurchases(String purchasedProductsData, String nonPurchasedProductsData, int type);
@@ -190,8 +190,8 @@
                         nativeOnCheckEnvironmentSuccess();        
                     }
 
-                    void onException(String action, String message) {
-                        nativeOnException(String action, String message);
+                    void onException(int action, String message) {
+                        nativeOnException(action, message);
                     }
 
                     void onObtainProductList(List&lt;ProductInfo&gt; products, int type) {

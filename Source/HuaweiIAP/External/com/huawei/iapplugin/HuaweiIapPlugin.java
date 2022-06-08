@@ -41,12 +41,19 @@ public class HuaweiIapPlugin {
     private static final String TAG = "HuaweiIapPlugin";
     private static int currentType = -1;
     private static String currentProductId;
-  
+
+    private static int CHECK_ENVIRONMENT = 0;
+    private static int QUERY_PRODUCTS = 1;
+    private static int BUY_PRODUCT = 2;
+    private static int QUERY_PURCHASES = 3;
+    private static int GET_PURCHASES_RECORDS = 4;
+
     public static void initialize(NativeActivity activity, HuaweiIapListener listener) {
         if (!isInit) {
             mActivity = activity;
             client = Iap.getIapClient(mActivity);
             mListener = listener;
+            isInit = true;
         }
     }
 
@@ -63,10 +70,10 @@ public class HuaweiIapPlugin {
                         mListener.onCheckEnvironmentSuccess();
                         break;
                     case OrderStatusCode.ORDER_ACCOUNT_AREA_NOT_SUPPORTED:
-                        mListener.onException("check enviroment", "This is unavailable in your country/region");  
+                        mListener.onException(CHECK_ENVIRONMENT, "This is unavailable in your country/region");  
                         break;
                     default:
-                        mListener.onException("check enviroment", "User cancel login.");
+                        mListener.onException(CHECK_ENVIRONMENT, "User cancel login.");
                         break;      
                 }
                 break;
@@ -74,7 +81,7 @@ public class HuaweiIapPlugin {
                 PurchaseResultInfo purchaseResultInfo = client.parsePurchaseResultInfoFromIntent(data);
                 switch(purchaseResultInfo.getReturnCode()) {
                     case OrderStatusCode.ORDER_STATE_CANCEL:
-                        mListener.onException("Buy product " + currentProductId, "Order has been canceled!");
+                        mListener.onException(BUY_PRODUCT, "Order with " + currentProductId + " has been canceled!");
                         break;
                     case OrderStatusCode.ORDER_STATE_FAILED:
                     case OrderStatusCode.ORDER_STATE_DEFAULT_CODE:
@@ -91,7 +98,7 @@ public class HuaweiIapPlugin {
                         if (isSuccess&& currentType != -1) {
                             mListener.onPurchaseSuccess(productId, currentType);
                         } else {
-                            mListener.onException("Buy product " + productId, "Failed to verify order!");     
+                            mListener.onException(BUY_PRODUCT, "Failed to verify order with " + productId + " !");     
                         }
                         break;
                     default:
@@ -113,7 +120,7 @@ public class HuaweiIapPlugin {
             @Override
             public void onFail(Exception e) {
                 Log.e(TAG, "isEnvReady fail, " + e.getMessage());
-                ExceptionHandle.handle(mActivity, "check environment", e, mListener);
+                ExceptionHandle.handle(mActivity, CHECK_ENVIRONMENT, e, mListener);
             }
         });
     }
@@ -135,8 +142,7 @@ public class HuaweiIapPlugin {
             @Override
             public void onFail(Exception e) {
                 Log.e(TAG, "obtainProductInfo: " + e.getMessage());
-                ExceptionHandle.handle(mActivity, "query products", e, mListener);
-                
+                ExceptionHandle.handle(mActivity, QUERY_PRODUCTS, e, mListener);
             }
         });   
     }
@@ -166,7 +172,7 @@ public class HuaweiIapPlugin {
 
             @Override
             public void onFail(Exception e) {
-                int errorCode = ExceptionHandle.handle(mActivity, "buy product", e, mListener);
+                int errorCode = ExceptionHandle.handle(mActivity, BUY_PRODUCT, e, mListener);
                 if (errorCode != ExceptionHandle.SOLVED) {
                     Log.e(TAG, "createPurchaseIntent, returnCode: " + errorCode);
                     switch (errorCode) {
@@ -194,7 +200,7 @@ public class HuaweiIapPlugin {
             @Override
             public void onSuccess(OwnedPurchasesResult result) {
                 if (result == null) {
-                    mListener.onException("result is null");
+                    mListener.onException(QUERY_PURCHASES, "result is null");
                     return;
                 }
                 String token = result.getContinuationToken();
@@ -230,7 +236,7 @@ public class HuaweiIapPlugin {
             @Override
             public void onFail(Exception e) {
                 Log.e(TAG, "obtainOwnedPurchases, type=" + IapClient.PriceType.IN_APP_CONSUMABLE + ", " + e.getMessage());
-                ExceptionHandle.handle(mActivity, "query purchases", e, mListener);
+                ExceptionHandle.handle(mActivity, QUERY_PURCHASES, e, mListener);
             }
         });
     }
@@ -258,7 +264,7 @@ public class HuaweiIapPlugin {
 
     private static void getPurchasedRecords(int type, String continuationToken) {
         if (type == IapClient.PriceType.IN_APP_NONCONSUMABLE) {
-            mListener.onException("Get purchased records", "For non-consumables, please use queryPurchases API");
+            mListener.onException(GET_PURCHASES_RECORDS, "For non-consumables, please use queryPurchases API");
         }
         IapRequestHelper.obtainOwnedPurchaseRecord(client, type, continuationToken, new IapApiCallback<OwnedPurchasesResult>() {
             @Override
@@ -292,7 +298,7 @@ public class HuaweiIapPlugin {
             @Override
             public void onFail(Exception e) {
                 Log.e(TAG, "obtainOwnedPurchaseRecord, " + e.getMessage());
-                ExceptionHandle.handle(mActivity, "get purchased record", e, mListener);          
+                ExceptionHandle.handle(mActivity, GET_PURCHASES_RECORDS, e, mListener);          
             }
         });
     }
