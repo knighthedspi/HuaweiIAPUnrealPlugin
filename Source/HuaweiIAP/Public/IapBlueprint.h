@@ -236,19 +236,20 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FOnObtainProductListException, FString, messag
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnPurchaseException, FString, message);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnObtainPurchasesException, FString, message);
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnObtainPurchasedRecordsException, FString, message);
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnObtainProductList, TArray<FProductInfo>, products, int, type);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnObtainProductList, const TArray<FProductInfo> &, products, int, type);
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnPurchaseSuccess, FString, productId, int, type);
-DECLARE_DYNAMIC_DELEGATE_ThreeParams(FOnObtainPurchases, TArray<FInAppPurchaseData>, purchasedProductDatas, TArray<FInAppPurchaseData>, nonPurchasedProductDatas, int, type);
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnObtainPurchasedRecords, TArray<FInAppPurchaseData>, purchasedProductDatas, int, type);
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FOnObtainPurchases, const TArray<FInAppPurchaseData> &, purchasedProductDatas, const TArray<FInAppPurchaseData> &, nonPurchasedProductDatas, int, type);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnObtainPurchasedRecords, const TArray<FInAppPurchaseData> &, purchasedProductDatas, int, type);
 
 UCLASS()
 class HUAWEIIAP_API UHuaweiIapBlueprint : public UBlueprintFunctionLibrary,
-                                          public huawei::IapListener  
+                                          public huawei::IapListener
 {
     GENERATED_BODY()
 
 public:
-    UHuaweiIapBlueprint(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer) {
+    UHuaweiIapBlueprint(const FObjectInitializer &ObjectInitializer) : Super(ObjectInitializer)
+    {
         huawei::Iap::setListener(this);
     };
 
@@ -277,7 +278,7 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "HuaweiIAP Category")
     static void getPurchasedRecords(int type, const FOnObtainPurchasedRecords &onSucceess, const FOnObtainPurchasedRecordsException &onException);
-    
+
     void onCheckEnvironmentSuccess();
     void onException(int action, const FString message);
     void onObtainProductList(const TArray<huawei::ProductInfo> products, int type);

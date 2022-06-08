@@ -2,7 +2,7 @@
 
 using namespace huawei;
 
-FProductInfo convertFromProductData(ProductInfo info)
+FProductInfo convertFromRawData(ProductInfo info)
 {
     FProductInfo fInfo;
     fInfo.currency = info.currency;
@@ -168,12 +168,11 @@ void UHuaweiIapBlueprint::onException(int action, const FString message)
 
 void UHuaweiIapBlueprint::onObtainProductList(const TArray<ProductInfo> products, int type)
 {
-    TArray<FProductInfo> fProducts;
-    for (auto &product : products)
-    {
-        fProducts.Add(convertFromProductData(product));
-    }
-    UHuaweiIapBlueprint::_onObtainProductList.ExecuteIfBound(fProducts, type);
+    UHuaweiIapBlueprint::_onObtainProductList.ExecuteIfBound
+    (
+        convertFromRawData<FProductInfo, ProductInfo>(products), 
+        type
+    );
 }
 
 void UHuaweiIapBlueprint::onPurchaseSuccess(const FString productId, int type)
