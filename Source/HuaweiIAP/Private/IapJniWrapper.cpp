@@ -169,17 +169,13 @@ namespace huawei
         if (JNIEnv *Env = FAndroidApplication::GetJavaEnv())
         {
             int size = productIds.size();
-            jstring ids[size];
+            jobjectArray ids = (jobjectArray) Env->NewObjectArray(size, FJavaWrapper::JavaStringClass, nullptr);
             for (int i = 0; i < size; i++)
             {
-                ids[i] = Env->NewStringUTF(productIds[i].c_str());
+                Env->SetObjectArrayElement(ids, i, Env->NewStringUTF(productIds[i].c_str()));
             }
             FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, HuaweiIap_Query_Products, ids, type);
-            for (int i = 0; i < size; i++)
-            {
-                const char* UTFString = Env->GetStringUTFChars(ids[i], nullptr);
-                Env->ReleaseStringUTFChars(ids[i], UTFString);
-            }
+            Env->DeleteLocalRef(ids);
             UE_LOG(LogAndroid, Warning, TEXT("I found the java method HuaweiIap_Query_Products\n"));
         }
         else

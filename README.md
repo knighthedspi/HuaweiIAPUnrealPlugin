@@ -145,7 +145,7 @@ According to [HMS integration process introduction](https://developer.huawei.com
    - Find your app project and click the app that needs to integrate the HMS Core SDK.
    - Go to **Project settings > General information**. In the App information area, download the `agconnect-services.json` file.
    ![Screenshots/agc_json.png](Screenshots/agc_json.png)
-   - You can put the json file under `<unreal_project_directory>/Configs/AGC` as default or in your own favorite path
+   - You can put the json file under `<unreal_project_directory>/Configs/AGC` as default (create the `Configs/AGC` directory if not existed) or in your own favorite path
    - Go to **Earn > In-App Purchases** and find the **IAP public key** for your app.
     ![Screenshots/iap_public_key.png](Screenshots/iap_public_key.png)
    - In your Unreal Editor, select **Edit -> Project Settings -> Plugins -> HuaweiIAP** then set up the `agconnect-services.json` file path and `IAP public key`.
@@ -156,7 +156,18 @@ According to [HMS integration process introduction](https://developer.huawei.com
 
 ### Developing
 
-Access the Huawei IAP API by including the header file `Iap.h` in the related classes of your project.
+#### Using Blueprint
+The below functions are supported with Blueprint
+- `checkEnviroment`
+- `queryProducts`
+- `queryPurchases`
+- `getPurchasedRecords`
+- `buyProduct`
+You can refer to the [Blueprint sample](Blueprint/HuaweiIap.uasset).
+![Screenshots/blueprint.png](Screenshots/blueprint.png)
+
+#### Using C++ APIs
+Access the Huawei IAP APIs by including the header file `Iap.h` in the related classes of your project.
 
 ```C++
 #include "Iap.h"
