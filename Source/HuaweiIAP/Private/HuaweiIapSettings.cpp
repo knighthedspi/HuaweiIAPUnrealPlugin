@@ -1,6 +1,6 @@
 #include "HuaweiIapSettings.h"
 
-UPrHuaweiIapSettings::UPrHuaweiIapSettings(const FObjectInitializer &ObjectInitializer)
+UHuaweiIapSettings::UHuaweiIapSettings(const FObjectInitializer &ObjectInitializer)
 	: Super(ObjectInitializer), HuaweiAGCConfig(TEXT("Config/AGC/agconnect-services.json")), HuaweiIAPPublicKey(TEXT(""))
 {
 }

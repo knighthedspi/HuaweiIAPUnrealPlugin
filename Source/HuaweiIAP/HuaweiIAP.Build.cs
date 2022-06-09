@@ -1,5 +1,6 @@
 using System.IO;
 using Tools.DotNETCommon;
+using UnrealBuildTool;
 
 namespace UnrealBuildTool.Rules
 {
@@ -7,6 +8,8 @@ namespace UnrealBuildTool.Rules
     {
         public HuaweiIAP(ReadOnlyTargetRules Target) : base(Target)
         {
+            PCHUsage = ModuleRules.PCHUsageMode.UseExplicitOrSharedPCHs;
+
             PrivateIncludePaths.AddRange(
                 new string[] {
                     "HuaweiIAP/Private"

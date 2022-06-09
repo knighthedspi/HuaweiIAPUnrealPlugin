@@ -42,11 +42,11 @@ public class HuaweiIapPlugin {
     private static int currentType = -1;
     private static String currentProductId;
 
-    private static int CHECK_ENVIRONMENT = 0;
-    private static int QUERY_PRODUCTS = 1;
-    private static int BUY_PRODUCT = 2;
-    private static int QUERY_PURCHASES = 3;
-    private static int GET_PURCHASES_RECORDS = 4;
+    public static int CHECK_ENVIRONMENT = 0;
+    public static int QUERY_PRODUCTS = 1;
+    public static int BUY_PRODUCT = 2;
+    public static int QUERY_PURCHASES = 3;
+    public static int GET_PURCHASES_RECORDS = 4;
 
     public static void initialize(NativeActivity activity, HuaweiIapListener listener) {
         if (!isInit) {
@@ -92,9 +92,9 @@ public class HuaweiIapPlugin {
                         }
                         break;
                     case OrderStatusCode.ORDER_STATE_SUCCESS:
-                        Pair<Boolean, String> verifyResult = verifyPurchaseStatus(currentType, purchaseResultInfo.getInAppPurchaseData(), purchaseResultInfo.getInAppDataSignature());
+                        Pair<Boolean, InAppPurchaseData> verifyResult = verifyPurchaseStatus(currentType, purchaseResultInfo.getInAppPurchaseData(), purchaseResultInfo.getInAppDataSignature());
                         boolean isSuccess = verifyResult.first;
-                        String productId = verifyResult.second;
+                        String productId = verifyResult.second.getProductId();
                         if (isSuccess&& currentType != -1) {
                             mListener.onPurchaseSuccess(productId, currentType);
                         } else {
@@ -125,7 +125,7 @@ public class HuaweiIapPlugin {
         });
     }
 
-    public static void queryProducts(String[] productIds, int type) {
+    public static void queryProducts(String[] productIds, final int type) {
         IapRequestHelper.obtainProductInfo(client, new ArrayList<>(Arrays.asList(productIds)), type, new IapApiCallback<ProductInfoResult>() {
             @Override
             public void onSuccess(ProductInfoResult result) {
@@ -151,7 +151,7 @@ public class HuaweiIapPlugin {
         queryPurchases(type, null);
     }
 
-    public static void buyProduct(String productId, int type) {
+    public static void buyProduct(final String productId, final int type) {
         currentProductId = productId;
         currentType = type;
         IapRequestHelper.createPurchaseIntent(client, productId, type, new IapApiCallback<PurchaseIntentResult>() {
@@ -180,7 +180,7 @@ public class HuaweiIapPlugin {
                             if (type != IapClient.PriceType.IN_APP_SUBSCRIPTION) {
                                 queryPurchases(type);
                             } else {
-                                IapRequestHelper.showSubscription(mActivity, productId);
+                                IapRequestHelper.showSubscription(mActivity, productId, BUY_PRODUCT, mListener);
                             }
                             break;
                         default:
@@ -195,7 +195,7 @@ public class HuaweiIapPlugin {
         getPurchasedRecords(type, null);
     }
 
-    private static void queryPurchases(int type, String continuationToken) {
+    private static void queryPurchases(final int type, String continuationToken) {
         IapRequestHelper.obtainOwnedPurchases(client, type, continuationToken, new IapApiCallback<OwnedPurchasesResult>() {
             @Override
             public void onSuccess(OwnedPurchasesResult result) {
@@ -204,7 +204,7 @@ public class HuaweiIapPlugin {
                     return;
                 }
                 String token = result.getContinuationToken();
-                if (!TextUtils.isEmpty(token) {
+                if (!TextUtils.isEmpty(token)) {
                     queryPurchases(type, token);
                     return;
                 }
@@ -218,7 +218,7 @@ public class HuaweiIapPlugin {
                     for (int i = 0; i < inAppPurchaseDataList.size(); i++) {
                         final String inAppPurchaseData = inAppPurchaseDataList.get(i);
                         final String inAppPurchaseDataSignature = inAppSignature.get(i);
-                        Pair<Boolean, InAppPurchaseData> verifyResult = verifyPurchaseStatus(inAppPurchaseData, inAppPurchaseDataSignature);
+                        Pair<Boolean, InAppPurchaseData> verifyResult = verifyPurchaseStatus(type, inAppPurchaseData, inAppPurchaseDataSignature);
                         boolean isPurchased = verifyResult.first;
                         InAppPurchaseData productData = verifyResult.second;
                         if (productData != null) {
@@ -262,7 +262,7 @@ public class HuaweiIapPlugin {
         }
     }
 
-    private static void getPurchasedRecords(int type, String continuationToken) {
+    private static void getPurchasedRecords(final int type, String continuationToken) {
         if (type == IapClient.PriceType.IN_APP_NONCONSUMABLE) {
             mListener.onException(GET_PURCHASES_RECORDS, "For non-consumables, please use queryPurchases API");
         }
@@ -284,13 +284,17 @@ public class HuaweiIapPlugin {
                 }
 
                 Log.i(TAG, "obtainOwnedPurchaseRecord, success");
-                for (int i = 0; i < signatureList.size(); i++) {
-                    String inAppPurchaseDataStr = inAppPurchaseDataList.get(i);
-                    // Check whether the signature of the purchase data is valid.
-                    boolean success = CipherUtil.doCheck(inAppPurchaseDataStr, signatureList.get(i), mPublicKey);
-                    if (success) {
-                        purchasedProductDatas.add(new InAppPurchaseData(inAppPurchaseDataStr));
+                try {
+                    for (int i = 0; i < signatureList.size(); i++) {
+                        String inAppPurchaseDataStr = inAppPurchaseDataList.get(i);
+                        // Check whether the signature of the purchase data is valid.
+                        boolean success = CipherUtil.doCheck(inAppPurchaseDataStr, signatureList.get(i), mPublicKey);
+                        if (success) {
+                            purchasedProductDatas.add(new InAppPurchaseData(inAppPurchaseDataStr));
+                        }
                     }
+                } catch (JSONException ex) {
+                    mListener.onException(GET_PURCHASES_RECORDS, "Error when parsing data");
                 }
                 mListener.onObtainPurchasedRecords(purchasedProductDatas, type); 
             }

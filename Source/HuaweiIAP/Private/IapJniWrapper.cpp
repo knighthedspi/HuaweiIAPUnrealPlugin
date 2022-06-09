@@ -1,6 +1,7 @@
 #include "IapJniWrapper.h"
 #include "HuaweiIapModule.h"
 #include "json98.h"
+#include "Iap.h"
 #include "Async/AsyncWork.h"
 
 using namespace std;
@@ -12,20 +13,21 @@ DEFINE_LOG_CATEGORY(HuaweiIap_Native);
 
 #include "Android/AndroidApplication.h"
 #include "Android/AndroidJNI.h"
+#include "Android/AndroidJava.h"
 
 // Initialize JNI context
-#define INIT_JAVA_METHOD(name, signature)
-if (JNIEnv *Env = FAndroidApplication::GetJavaEnv(true))
-{
-    name = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, #name, signature, false);
-    check(name != NULL);
-}
-else
-{
-    check(0);
-}
+#define INIT_JAVA_METHOD(name, signature) \
+if (JNIEnv *Env = FAndroidApplication::GetJavaEnv()) \
+{ \
+    name = FJavaWrapper::FindMethod(Env, FJavaWrapper::GameActivityClassID, #name, signature, false); \
+    check(name != NULL); \
+} \
+else \
+{ \
+    check(0); \
+} \
 
-#define DECLARE_JAVA_METHOD(name)
+#define DECLARE_JAVA_METHOD(name) \
 static jmethodID name = NULL;
 
 string jstring2string(JNIEnv *env, jstring jstr)
@@ -77,9 +79,8 @@ extern "C" void Java_com_epicgames_ue4_GameActivity_nativeOnCheckEnvironmentSucc
               { huawei::IapJniWrapper::getInstance()->onCheckEnvironmentSuccess(); });
 }
 
-extern "C" void Java_com_epicgames_ue4_GameActivity_nativeOnException(JNIEnv *env, jobject thiz, int action_, jstring message_)
+extern "C" void Java_com_epicgames_ue4_GameActivity_nativeOnException(JNIEnv *env, jobject thiz, int action, jstring message_)
 {
-    FString action = jstring2FString(env, action_);
     FString message = jstring2FString(env, message_);
     AsyncTask(ENamedThreads::GameThread, [=]()
               { huawei::IapJniWrapper::getInstance()->onException(action, message); });
@@ -94,7 +95,7 @@ extern "C" void Java_com_epicgames_ue4_GameActivity_nativeOnObtainProductList(JN
 
 extern "C" void Java_com_epicgames_ue4_GameActivity_nativeOnPurchaseSuccess(JNIEnv *env, jobject thiz, jstring data_, int type)
 {
-    string data = jstring2string(env, data_);
+    FString data = jstring2FString(env, data_);
     AsyncTask(ENamedThreads::GameThread, [=]()
               { huawei::IapJniWrapper::getInstance()->onPurchaseSuccess(data, type); });
 }
@@ -152,7 +153,7 @@ namespace huawei
 
     void IapJniWrapper::checkEnvironment()
     {
-        if (JNIEnv *Env = FAndroidApplication::GetJavaEnv(true))
+        if (JNIEnv *Env = FAndroidApplication::GetJavaEnv())
         {
             FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, HuaweiIap_Check_Environment);
             UE_LOG(LogAndroid, Warning, TEXT("I found the java method HuaweiIap_Check_Environment\n"));
@@ -165,16 +166,20 @@ namespace huawei
 
     void IapJniWrapper::queryProducts(const vector<string> productIds, int type)
     {
-        if (JNIEnv *Env = FAndroidApplication::GetJavaEnv(true))
+        if (JNIEnv *Env = FAndroidApplication::GetJavaEnv())
         {
             int size = productIds.size();
-            jstring[] ids = new jstring[size];
-            for (int i = 0; i < length; i++)
+            jstring ids[size];
+            for (int i = 0; i < size; i++)
             {
                 ids[i] = Env->NewStringUTF(productIds[i].c_str());
             }
             FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, HuaweiIap_Query_Products, ids, type);
-            Env->DeleteLocalRef(ids);
+            for (int i = 0; i < size; i++)
+            {
+                const char* UTFString = Env->GetStringUTFChars(ids[i], nullptr);
+                Env->ReleaseStringUTFChars(ids[i], UTFString);
+            }
             UE_LOG(LogAndroid, Warning, TEXT("I found the java method HuaweiIap_Query_Products\n"));
         }
         else
@@ -185,7 +190,7 @@ namespace huawei
 
     void IapJniWrapper::queryPurchases(int type)
     {
-        if (JNIEnv *Env = FAndroidApplication::GetJavaEnv(true))
+        if (JNIEnv *Env = FAndroidApplication::GetJavaEnv())
         {
             FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, HuaweiIap_Query_Purchases, type);
             UE_LOG(LogAndroid, Warning, TEXT("I found the java method HuaweiIap_Query_Purchases\n"));
@@ -198,7 +203,7 @@ namespace huawei
 
     void IapJniWrapper::buyProduct(const string productId, int type)
     {
-        if (JNIEnv *Env = FAndroidApplication::GetJavaEnv(true))
+        if (JNIEnv *Env = FAndroidApplication::GetJavaEnv())
         {
             jstring id = Env->NewStringUTF(productId.c_str());
             FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, HuaweiIap_Buy_Product, id, type);
@@ -213,7 +218,7 @@ namespace huawei
 
     void IapJniWrapper::getPurchasedRecords(int type)
     {
-        if (JNIEnv *Env = FAndroidApplication::GetJavaEnv(true))
+        if (JNIEnv *Env = FAndroidApplication::GetJavaEnv())
         {
             FJavaWrapper::CallVoidMethod(Env, FJavaWrapper::GameActivityThis, HuaweiIAP_Get_PurchaseRecords, type);
             UE_LOG(LogAndroid, Warning, TEXT("I found the java method HuaweiIAP_Get_PurchaseRecords\n"));
@@ -256,7 +261,7 @@ namespace huawei
         }
     }
 
-    void IapJniWrapper::onException(const FString action, const FString message)
+    void IapJniWrapper::onException(int action, const FString message)
     {
         if (_listener != nullptr)
         {
@@ -273,7 +278,7 @@ namespace huawei
         }
     }
 
-    void IapJniWrapper::onPurchaseSuccess(const FString &productId, int type)
+    void IapJniWrapper::onPurchaseSuccess(const FString productId, int type)
     {
         if (_listener != nullptr)
         {

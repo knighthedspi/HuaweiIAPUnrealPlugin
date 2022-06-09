@@ -3,7 +3,7 @@
 #include "HuaweiIapSettings.generated.h"
 
 UCLASS(config = Engine, defaultconfig)
-class UPrHuaweiIapSettings : public UObject
+class UHuaweiIapSettings : public UObject
 {
 	GENERATED_UCLASS_BODY()
 
