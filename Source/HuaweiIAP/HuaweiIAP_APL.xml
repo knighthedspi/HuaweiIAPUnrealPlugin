@@ -78,6 +78,8 @@
         <insert>
             <![CDATA[
                 import com.huawei.iapplugin.*;
+                import com.huawei.hms.iap.entity.InAppPurchaseData;
+                import com.huawei.hms.iap.entity.ProductInfo;
                 import org.json.JSONArray;
                 import org.json.JSONException;
                 import org.json.JSONObject;
@@ -109,7 +111,7 @@
                     HuaweiIapPlugin.getPurchasedRecords(type);   
                 }
 
-                private JSONObject convertToIAPDataJSon(List&lt;InAppPurchaseData&gt; dataList, String action) {
+                private String convertToIAPDataJSon(List<InAppPurchaseData> dataList, int action) {
                     JSONArray array = new JSONArray();
                     try {
                         for (InAppPurchaseData data: dataList) {
@@ -172,7 +174,7 @@
 
                 //Native C++ functions
                 public native void nativeOnCheckEnvironmentSuccess();
-                public native void nativeOnException(String action, String message);
+                public native void nativeOnException(int action, String message);
                 public native void nativeOnObtainProductList(String productsData, int type);
                 public native void nativeOnPurchaseSuccess(String productId, int type);
                 public native void nativeOnObtainPurchases(String purchasedProductsData, String nonPurchasedProductsData, int type);
@@ -186,15 +188,18 @@
         <insert>
             <![CDATA[
                 HuaweiIapPlugin.initialize(this, new HuaweiIapListener() {
-                    void onCheckEnvironmentSuccess() {
+                    @Override
+                    public void onCheckEnvironmentSuccess() {
                         nativeOnCheckEnvironmentSuccess();        
                     }
 
-                    void onException(String action, String message) {
-                        nativeOnException(String action, String message);
+                    @Override
+                    public void onException(int action, String message) {
+                        nativeOnException(action, message);
                     }
 
-                    void onObtainProductList(List&lt;ProductInfo&gt; products, int type) {
+                    @Override
+                    public void onObtainProductList(List<ProductInfo> products, int type) {
                         JSONArray array = new JSONArray();
                         try {
                             for (ProductInfo product : products) {
@@ -223,29 +228,33 @@
                             }
                             nativeOnObtainProductList(array.toString(), type);
                         } catch (JSONException ex) {
-                            nativeOnException("onObtainProductList", "Failed to parse data");
+                            nativeOnException(HuaweiIapPlugin.QUERY_PURCHASES, "Failed to parse data");
                         }
                     }
 
-                    void onPurchaseSuccess(String productId, int type) {
+                    @Override
+                    public void onPurchaseSuccess(String productId, int type) {
                         nativeOnPurchaseSuccess(productId, type);    
                     }
 
-                    void onObtainPurchases(List&lt;InAppPurchaseData&gt; purchasedProducts, List&lt;InAppPurchaseData&gt; nonPurchasedProducts, int type) {
-                        String purchasedProductsData = convertToIAPDataJSon(purchasedProducts, "onObtainPurchases");
-                        String nonPurchasedProductsData = convertToIAPDataJSon(nonPurchasedProducts, "onObtainPurchases");
+                    @Override
+                    public void onObtainPurchases(List<InAppPurchaseData> purchasedProducts, List<InAppPurchaseData> nonPurchasedProducts, int type) {
+                        String purchasedProductsData = convertToIAPDataJSon(purchasedProducts, HuaweiIapPlugin.QUERY_PURCHASES);
+                        String nonPurchasedProductsData = convertToIAPDataJSon(nonPurchasedProducts, HuaweiIapPlugin.QUERY_PURCHASES);
                         nativeOnObtainPurchases(purchasedProductsData, nonPurchasedProductsData, type);
                     }
 
-                    void onObtainPurchasedRecords(List&lt;InAppPurchaseData&gt; purchasedProducts, int type) {
-                        String purchasedProductsData = convertToIAPDataJSon(purchasedProducts, "onObtainPurchases");
+                    @Override
+                    public void onObtainPurchasedRecords(List<InAppPurchaseData> purchasedProducts, int type) {
+                        String purchasedProductsData = convertToIAPDataJSon(purchasedProducts, HuaweiIapPlugin.GET_PURCHASES_RECORDS);
                         nativeOnObtainPurchasedRecords(purchasedProductsData, type);     
                     }
                 });
                 
-                HuaweiIapPlugin.setPublicKey($S(IAP_PUBLIC_KEY)); 
+                HuaweiIapPlugin.setPublicKey("IAP_PUBLIC_KEY"); 
             ]]>
         </insert>
+        <replace find="IAP_PUBLIC_KEY" with="$S(IAP_PUBLIC_KEY)"/>
     </gameActivityOnCreateAdditions>
 
     <gameActivityOnActivityResultAdditions>

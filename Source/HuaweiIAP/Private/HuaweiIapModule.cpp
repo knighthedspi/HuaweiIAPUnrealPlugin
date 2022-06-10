@@ -3,7 +3,6 @@
 #include "HuaweiIapSettings.h"
 #include "Core.h"
 #include "Modules/ModuleManager.h"
-#include "Interfaces/IPluginManager.h"
 
 #include "Misc/ConfigCacheIni.h"
 #include "UObject/Package.h"
@@ -17,7 +16,7 @@ class HuaweiIapModule : public IHuaweiIapModule
     virtual void StartupModule() override
     {
         // This code will execute after your module is loaded into memory; the exact timing is specified in the .uplugin file per-module
-        Settings = NewObject<UPrHuaweiIapSettings>(GetTransientPackage(), "HuaweiIapSettings", RF_Standalone);
+        Settings = NewObject<UHuaweiIapSettings>(GetTransientPackage(), "HuaweiIapSettings", RF_Standalone);
         Settings->AddToRoot();
         if (ISettingsModule *SettingsModule = FModuleManager::GetModulePtr<ISettingsModule>("Settings"))
         {
@@ -44,7 +43,7 @@ class HuaweiIapModule : public IHuaweiIapModule
     }
 
 private:
-    UPrHuaweiIapSettings *Settings;
+    UHuaweiIapSettings *Settings;
 };
 
 IMPLEMENT_MODULE(HuaweiIapModule, HuaweiIAP)

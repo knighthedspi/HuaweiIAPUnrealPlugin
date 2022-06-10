@@ -13,12 +13,12 @@ namespace huawei
         IapJniWrapper::getInstance()->checkEnvironment();
     }
 
-    void Iap::queryProducts(const std::vector<FString> &productIds, int type)
+    void Iap::queryProducts(const TArray<FString> productIds, int type)
     {
         vector<string> ids;
-        for (int i = 0; i < productIds.size(); i++)
+        for (auto& productId : productIds)
         {
-            ids.push_back(TCHAR_TO_UTF8(*productIds[i]));
+            ids.push_back(TCHAR_TO_UTF8(*productId));
         }
         IapJniWrapper::getInstance()->queryProducts(ids, type);
     }
@@ -28,7 +28,7 @@ namespace huawei
         IapJniWrapper::getInstance()->queryPurchases(type);
     }
 
-    void Iap::buyProduct(FString &productId, int type)
+    void Iap::buyProduct(FString productId, int type)
     {
         IapJniWrapper::getInstance()->buyProduct(TCHAR_TO_UTF8(*productId), type);
     }

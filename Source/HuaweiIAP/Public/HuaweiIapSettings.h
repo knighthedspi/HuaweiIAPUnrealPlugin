@@ -1,11 +1,9 @@
-// Copyright 2020-2021 Nikolay Prudnikov. All Rights Reserved.
-
 #pragma once
 
 #include "HuaweiIapSettings.generated.h"
 
 UCLASS(config = Engine, defaultconfig)
-class UPrHuaweiIapSettings : public UObject
+class UHuaweiIapSettings : public UObject
 {
 	GENERATED_UCLASS_BODY()
 

@@ -39,6 +39,7 @@ import com.huawei.hms.iap.entity.PurchaseIntentResult;
 import com.huawei.hms.iap.entity.StartIapActivityReq;
 import com.huawei.hms.iap.entity.StartIapActivityResult;
 import com.huawei.hms.support.api.client.Status;
+import com.huawei.iapplugin.HuaweiIapListener;
 
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class IapRequestHelper {
         PurchaseIntentReq req = new PurchaseIntentReq();
         req.setPriceType(type);
         req.setProductId(productId);
-        req.setDeveloperPayload("testPurchase");
+        req.setDeveloperPayload("SdkPurchase");
         return req;
     }
 
@@ -77,7 +78,7 @@ public class IapRequestHelper {
     private static ConsumeOwnedPurchaseReq createConsumeOwnedPurchaseReq(String purchaseToken) {
         ConsumeOwnedPurchaseReq req = new ConsumeOwnedPurchaseReq();
         req.setPurchaseToken(purchaseToken);
-        req.setDeveloperChallenge("testConsume");
+        req.setDeveloperChallenge("SdkConsume");
         return req;
     }
 
@@ -312,7 +313,7 @@ public class IapRequestHelper {
      * @param activity The activity to launch a new page.
      * @param productId The productId of the subscription product.
      */
-    public static void showSubscription(final Activity activity, String productId) {
+    public static void showSubscription(final Activity activity, String productId, final int action, final HuaweiIapListener listener) {
         StartIapActivityReq req = new StartIapActivityReq();
         if (TextUtils.isEmpty(productId)) {
             req.setType(StartIapActivityReq.TYPE_SUBSCRIBE_MANAGER_ACTIVITY);
@@ -334,7 +335,7 @@ public class IapRequestHelper {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(Exception e) {
-                ExceptionHandle.handle(activity, e);
+                ExceptionHandle.handle(activity, action, e, listener);
             }
         });
     }
