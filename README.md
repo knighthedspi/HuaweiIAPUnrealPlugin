@@ -175,7 +175,7 @@ Access the Huawei IAP APIs by including the header file `Iap.h` in the related c
 
 Huawei IAP supported 3 types:
 
-<div style="width:80px">Type</div>                       | Description                | 
+| <div style="width:80px">Type</div>                       | Description                | 
   | ------------------------------------------------------------ | ----------------------- |
   | IN_APP_CONSUMABLE | Consumable product |
   | IN_APP_NONCONSUMABLE | Non consumable product |
@@ -221,7 +221,7 @@ huawei::Iap::getPurchasedRecords(IN_APP_CONSUMABLE)
 Implement a listener class to receive information in all the IAP callback events
 
 Action types table:
-<div style="width:80px">Type</div>                       | Description                | 
+| <div style="width:80px">Type</div>                       | Description                | 
   | ------------------------------------------------------------ | ----------------------- |
   | CHECK_ENVIRONMENT | Check the support for Huawei IAP |
   | QUERY_PRODUCTS | Query products configured on Huawei AppGalleryConnect |
