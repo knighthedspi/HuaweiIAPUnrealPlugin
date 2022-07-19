@@ -28,9 +28,9 @@ FProductInfo convertFromRawData(ProductInfo info)
     return fInfo;
 }
 
-FInAppPurchaseData convertFromRawData(InAppPurchaseData data)
+FHuaweiInAppPurchaseData convertFromRawData(InAppPurchaseData data)
 {
-    FInAppPurchaseData fData;
+    FHuaweiInAppPurchaseData fData;
     fData.accountFlag = data.accountFlag;
     fData.appInfo = data.appInfo;
     fData.applicationId = data.applicationId;
@@ -184,8 +184,8 @@ void UHuaweiIapBlueprint::onObtainPurchases(const TArray<InAppPurchaseData> purc
 {
     UHuaweiIapBlueprint::_onObtainPurchases.ExecuteIfBound
     (
-        convertFromRawData<FInAppPurchaseData, InAppPurchaseData>(purchasedProductDatas),
-        convertFromRawData<FInAppPurchaseData, InAppPurchaseData>(nonPurchasedProductDatas),
+        convertFromRawData<FHuaweiInAppPurchaseData, InAppPurchaseData>(purchasedProductDatas),
+        convertFromRawData<FHuaweiInAppPurchaseData, InAppPurchaseData>(nonPurchasedProductDatas),
         type
     );
 }
@@ -194,7 +194,7 @@ void UHuaweiIapBlueprint::onObtainPurchasedRecords(const TArray<InAppPurchaseDat
 {
     UHuaweiIapBlueprint::_onObtainPurchasedRecords.ExecuteIfBound
     (
-        convertFromRawData<FInAppPurchaseData, InAppPurchaseData>(purchasedProductDatas),
+        convertFromRawData<FHuaweiInAppPurchaseData, InAppPurchaseData>(purchasedProductDatas),
         type
     );
 }

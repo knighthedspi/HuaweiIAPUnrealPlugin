@@ -6,6 +6,36 @@
         <setStringFromProperty result="IAP_PUBLIC_KEY" ini="Engine" section="/Script/HuaweiIAP.HuaweiIapSettings" property="HuaweiIAPPublicKey" default=""/>
 	</init>
 
+  <!-- optional files or directories to copy to Intermediate/Android/APK -->
+  <gradleCopies>
+
+    <copyDir src="$S(PluginDir)/../ThirdParty/Android/Java"
+          dst = "$S(BuildDir)/src" />
+
+    <copyDir src="$S(PluginDir)/../ThirdParty/Android/Java"
+					dst = "$S(BuildDir)/gradle/app/src/main/java" />
+
+    <copyDir src="$S(PluginDir)/../ThirdParty/Android/permission_library"
+					dst="$S(BuildDir)/JavaLibs/permission_library" />
+
+    <copyDir src="$S(PluginDir)/../ThirdParty/Android/permission_library"
+					dst="$S(BuildDir)/gradle/permission_library" />
+    
+    <copyFile src="$S(PluginDir)/../ThirdParty/Android/gradle-wrapper.properties"
+          dst="$S(BuildDir)/gradle/gradle/wrapper/gradle-wrapper.properties"/>
+
+    <copyFile src="$S(PluginDir)/../ThirdParty/Android/build.gradle"
+          dst="$S(BuildDir)/gradle/build.gradle"/>
+    
+  </gradleCopies>
+
+  <gradleProperties>
+    <insert>
+      android.useAndroidX=true
+      android.enableJetifier=true
+    </insert>
+  </gradleProperties>
+  
     <buildscriptGradleAdditions>
         <log text="Huawei IAP Configure HMS Core SDK"/>
         <insert>

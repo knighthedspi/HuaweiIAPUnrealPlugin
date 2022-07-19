@@ -14,6 +14,8 @@
 #define QUERY_PURCHASES 3
 #define GET_PURCHASES_RECORDS 4
 
+using namespace huawei;
+
 USTRUCT(Blueprintable, BlueprintType)
 struct HUAWEIIAP_API FProductInfo
 {
@@ -81,7 +83,7 @@ struct HUAWEIIAP_API FProductInfo
 };
 
 USTRUCT(Blueprintable, BlueprintType)
-struct HUAWEIIAP_API FInAppPurchaseData
+struct HUAWEIIAP_API FHuaweiInAppPurchaseData
 {
     GENERATED_BODY()
 
@@ -238,12 +240,11 @@ DECLARE_DYNAMIC_DELEGATE_OneParam(FOnObtainPurchasesException, FString, message)
 DECLARE_DYNAMIC_DELEGATE_OneParam(FOnObtainPurchasedRecordsException, FString, message);
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnObtainProductList, const TArray<FProductInfo> &, products, int, type);
 DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnPurchaseSuccess, FString, productId, int, type);
-DECLARE_DYNAMIC_DELEGATE_ThreeParams(FOnObtainPurchases, const TArray<FInAppPurchaseData> &, purchasedProductDatas, const TArray<FInAppPurchaseData> &, nonPurchasedProductDatas, int, type);
-DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnObtainPurchasedRecords, const TArray<FInAppPurchaseData> &, purchasedProductDatas, int, type);
+DECLARE_DYNAMIC_DELEGATE_ThreeParams(FOnObtainPurchases, const TArray<FHuaweiInAppPurchaseData> &, purchasedProductDatas, const TArray<FHuaweiInAppPurchaseData> &, nonPurchasedProductDatas, int, type);
+DECLARE_DYNAMIC_DELEGATE_TwoParams(FOnObtainPurchasedRecords, const TArray<FHuaweiInAppPurchaseData> &, purchasedProductDatas, int, type);
 
 UCLASS()
-class HUAWEIIAP_API UHuaweiIapBlueprint : public UBlueprintFunctionLibrary,
-                                          public huawei::IapListener
+class HUAWEIIAP_API UHuaweiIapBlueprint : public UBlueprintFunctionLibrary, public IapListener
 {
     GENERATED_BODY()
 
